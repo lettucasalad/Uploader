@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegraph 图片上传</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        input[type="file"] {
+            display: block;
+            margin: 10px auto;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #upload-result {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>上传图片到 Telegraph</h2>
+    <form id="upload-form">
+        <input id="select-file" name="file0" type="file" accept="image/*">
+        <button type="submit">点击上传</button>
+    </form>
+    <div id="upload-result"></div>
+</div>
+
+<script>
+document.getElementById("upload-form").addEventListener("submit", function(event) {
+    event.preventDefault(); // 阻止默认提交行为
+    let fileInput = document.getElementById("select-file");
+    let file = fileInput.files[0];
+
+    if (!file) {
+        alert("请选择一张图片！");
+        return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) { // 5MB 限制
+        alert("文件大小不能超过 5MB！");
+        return;
+    }
+
+    let formData = new FormData();
+    formData.append("file0", file);
+
+    fetch("https://telegra.ph/upload", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data[0] && data[0].src) {
+            let imgUrl = "https://telegra.ph" + data[0].src;
+            document.getElementById("upload-result").innerHTML = `
+                <p>上传成功！</p>
+                <p><a href="${imgUrl}" target="_blank">${imgUrl}</a></p>
+                <img src="${imgUrl}" alt="Uploaded Image">
+            `;
+        } else {
+            alert("上传失败！");
+        }
+    })
+    .catch(error => alert("错误：" + error.message));
+});
+</script>
+
+</body>
+</html>
